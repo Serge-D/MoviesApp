@@ -1,0 +1,15 @@
+{
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": true
+      },
+    "eslint.alwaysShowStatus": true,
+    "javascript.validate.enable": true,
+    "files.eol": "\r\n",
+    "workbench.statusBar.visible": true,
+    "files.associations": {
+        "*.js": "javascriptreact",
+        "*.jsx": "javascriptreact"
+    }
+}
