@@ -1,49 +1,73 @@
-import React, {useState} from 'react'
-import { InputAdornment } from '@mui/material'
-import { TextField } from '@mui/material'
-import { MenuItem } from '@mui/material'
+import  React, {useState} from 'react'
+import { useTheme } from '@mui/material/styles'
+import OutlinedInput from '@mui/material/OutlinedInput'
+import InputLabel from '@mui/material/InputLabel'
+import MenuItem from '@mui/material/MenuItem'
+import FormControl from '@mui/material/FormControl'
+import Select from '@mui/material/Select'
 
-const categories = ['Animation', 'Comedy', 'Drame', 'Thriller']
-
-const sxAdornment = {
-	'& .MuiTypography-root': {
-		fontSize: '0.9rem',
-		color: '#4e6f99',
+const ITEM_HEIGHT = 48
+const ITEM_PADDING_TOP = 8
+const MenuProps = {
+	PaperProps: {
+		style: {
+			maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+			width: 250,
+		},
 	},
 }
+
+const categoriesList = ['Animation', 'Comedy', 'Thriller', 'Drame']
+
+function getStyles(category, categories, theme) {
+	return {
+		fontWeight:
+			categories.indexOf(category) === -1
+				? theme.typography.fontWeightRegular
+				: theme.typography.fontWeightMedium,
+	}
+}
+
 const CategoryFilter = () => {
-	const [category, setCategory] = useState('')
+	const theme = useTheme()
+	const [categories, setCategories] = useState([])
+
 	const handleChange = (event) => {
 		const {
 			target: { value },
 		} = event
-		setCategory(value)
+		setCategories(
+
+			typeof value === 'string' ? value.split(',') : value,
+		)
+        console.log("resultat", categories)
 	}
+
 	return (
-		<TextField
-			select
-			multiple
-			value={category}
-			onChange={(e) => handleChange(e.target.value)}
-			fullWidth={false}
-			variant="standard"
-			size="small"
-			sx={{ ft: '0.9rem' }}
-			InputProps={{
-				startAdornment: (
-					<InputAdornment position="start" sx={sxAdornment}>
-						Catégories
-					</InputAdornment>
-				),
-			}}
-		>
-			{categories.map((item, index) => (
-				<MenuItem key={index} value={categories[index]}>
-					{categories[index]}
-				</MenuItem>
-			))}
-		</TextField>
+		<div>
+			<FormControl sx={{ m: 1, width: 300 }}>
+				<InputLabel id="category">Categories</InputLabel>
+				<Select
+					labelId="category"
+					id="category"
+					multiple
+					value={categories}
+					onChange={handleChange}
+					input={<OutlinedInput label="categories" />}
+					MenuProps={MenuProps}
+				>
+					{categoriesList.map((category) => (
+						<MenuItem
+							key={category}
+							value={category}
+							style={getStyles(category, categoriesList, theme)}
+						>
+							{category}
+						</MenuItem>
+					))}
+				</Select>
+			</FormControl>
+		</div>
 	)
 }
-
 export default CategoryFilter
