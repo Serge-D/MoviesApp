@@ -8,7 +8,7 @@ import { blueGrey } from "@mui/material/colors";
 const sxAppBar = {
     borderRadius : 1,
     backgroundColor : blueGrey[800],
-    color: blueGrey[900]
+    color: "white"
 }
 
 const Header = () => {

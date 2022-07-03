@@ -1,5 +1,7 @@
 import React from "react";
-import PropTypes from "prop-types";
+import { useSelector, useDispatch } from "react-redux";
+import calculateTotalPages from "../../tools/calculateTotalPages";
+import { filmsSelector, updateFilmsPerPage } from "../../redux/redux";
 import { InputAdornment } from "@mui/material";
 import { TextField } from "@mui/material";
 import { MenuItem } from "@mui/material";
@@ -17,9 +19,19 @@ const sxAdornment = {
 	},
 };
 
-const FilmsPerPage = ({filmsPerPage, setFilmsPerPage}) =>{
+const FilmsPerPage = () =>{
+
+    const dispatch =useDispatch()
+
+    const {filmsPerPage, currentPage, totalFilms, films} = useSelector(filmsSelector)
+
     const handleChange = (number) =>{
-        setFilmsPerPage(number)
+        const totalPages = calculateTotalPages(totalFilms, number)
+		const firstIndex = (currentPage - 1) * number
+		const lastIndex = currentPage * number
+		const data = films.slice(firstIndex, lastIndex)
+		const payload = { totalPages, filmsPerPage: number, currentFilmsPage: [...data] } 
+        dispatch(updateFilmsPerPage(payload))
     }
 
     return(
@@ -46,11 +58,6 @@ const FilmsPerPage = ({filmsPerPage, setFilmsPerPage}) =>{
             ))}
         </TextField>
     )
-}
-
-FilmsPerPage.propTypes= {
-    filmsPerPage: PropTypes.number.isRequired,
-    setFilmsPerPage: PropTypes.func.isRequired
 }
 
 export default FilmsPerPage
