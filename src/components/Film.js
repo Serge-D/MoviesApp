@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
 import Button from '@mui/material/Button'
@@ -15,8 +15,8 @@ import LikeIcon from '@mui/icons-material/ThumbUp'
 import DislikeIcon from '@mui/icons-material/ThumbDown'
 import LocalMoviesIcon from '@mui/icons-material/LocalMovies'
 
-import { deleteFilm, filmsSelector, updateFilm } from '../redux/redux'
-import calculateTotalPages from '../tools/calculateTotalPages'
+import { deleteFilm, filmsSelector, updateFilm } from '../redux/films'
+import { paginationSelector, updatePagination} from "../redux/pagination"
 
 const sxLike = {
 	'&.active': {
@@ -38,41 +38,95 @@ const getRatio = (likes, dislikes) => {
 
 const Film = ({ film }) => {
 	const dispatch = useDispatch()
-
-	const { totalFilms, filmsPerPage } = useSelector(filmsSelector)
-
-	const { id, title, category, likes, dislikes, img } = film
-
-	const [isLike, setIsLike] = useState(false)
+    const [isLike, setIsLike] = useState(false)
 	const [isDislike, setIsDislike] = useState(false)
+	const [isDelete, setIsDelete] = useState(false)
+	const [isUpdate, setIsUpdate] = useState(false)
+	const { films, totalFilms } = useSelector(filmsSelector)
+	const { currentPage, filmsPerPage } = useSelector(paginationSelector)
+
+	const { 
+        id, 
+        title, 
+        category, 
+        likes, 
+        dislikes,
+        isLike: isFilmLike,
+        isDislike: isFilmDislike,
+        img
+    } = film
+
+    useEffect(()=>{
+        if(isFilmLike !== null) setIsLike(isFilmLike)
+        if(isFilmDislike !== null) setIsDislike(isFilmDislike)
+    }, [])
+
+    useEffect(()=>{
+        const payload = {
+            films,
+            currentPage,
+            filmsPerPage,
+            totalFilms
+        }
+        if(isDelete){
+            setIsDelete(false)
+            dispatch(updatePagination(payload))
+        }
+    },[isDelete])
+
+    useEffect(()=>{
+        const payload = {
+            films,
+            currentPage,
+            filmsPerPage,
+            totalFilms
+        }
+        if(isUpdate){
+            setIsUpdate(false)
+            dispatch(updatePagination(payload))
+        }
+    },[isUpdate])
 
 	const handleDelete = () => {
-		const newTotalPages = calculateTotalPages(totalFilms - 1, filmsPerPage)
-		const payload = { totalPages: newTotalPages, id }
-		dispatch(deleteFilm(payload))
+		dispatch(deleteFilm(id))
+        setIsDelete(true)
 	}
 
 	const handleLike = () => {
+		let newDislikes = dislikes
 		setIsLike(true)
-		const payload = { id, likes: likes+1, dislikes }
+		if (isDislike) {
+			--newDislikes
+			setIsDislike(false)
+		}
+		const payload = { id, likes: likes + 1, dislikes: newDislikes, isLike, isDislike }
 		dispatch(updateFilm(payload))
+		setIsUpdate(true)
 	}
     
     const handleUnlike = () => {
 		setIsLike(false)
-		const payload = { id, likes: likes -1, dislikes }
+		const payload = { id, likes: likes - 1, dislikes, isLike, isDislike }
 		dispatch(updateFilm(payload))
+		setIsUpdate(true)
 	}
 
 	const handleDislike = () => {
+		let newLikes = likes
 		setIsDislike(true)
-		const payload = { id, likes, dislikes: dislikes +1 }
+		if (isLike) {
+			--newLikes
+			setIsLike(false)
+		}
+		const payload = { id, likes: newLikes, dislikes: dislikes + 1, isLike, isDislike }
 		dispatch(updateFilm(payload))
+		setIsUpdate(true)
 	}
     const handleUndislike = () => {
 		setIsDislike(false)
-		const payload = { id, likes, dislikes: dislikes -1 }
+		const payload = { id, likes, dislikes: dislikes - 1, isLike, isDislike }
 		dispatch(updateFilm(payload))
+		setIsUpdate(true)
 	}
 
 	return (

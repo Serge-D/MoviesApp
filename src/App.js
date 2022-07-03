@@ -1,11 +1,11 @@
 import React from 'react'
 import { Provider } from 'react-redux'
-import { store } from "./redux/redux"
 import CssBaseline from '@mui/material/CssBaseline'
 import Container from '@mui/material/Container'
 import Paper from '@mui/material/Paper'
 import grey from '@mui/material/colors/grey'
 
+import { store } from "./redux/store"
 import Header from './components/Header'
 import Films from './components/Films'
 
