@@ -28,3 +28,5 @@ export const categoriesSlice = createSlice({
 export const { updateCategories } = categoriesSlice.actions
 
 export const categoriesSelector = (state) => state.categories
+
+// il y a un bug au niveau de l'affichage du filtre des categories, l'application à un train de retard et l'affichage ne se fait pas malgré que le tableau des films filtré par catégories est mis à jour
