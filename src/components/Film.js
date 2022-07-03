@@ -53,30 +53,25 @@ const Film = ({ film }) => {
 	}
 
 	const handleLike = () => {
-		let newLikes
-		let newDislikes = dislikes
-		if (isLike) {
-			newLikes = likes - 1
-		} else {
-			newLikes = likes + 1
-		}
-		setIsLike(!isLike)
-		setIsDislike(false)
-		const payload = { id, likes: newLikes, dislikes: newDislikes }
+		setIsLike(true)
+		const payload = { id, likes: likes+1, dislikes }
+		dispatch(updateFilm(payload))
+	}
+    
+    const handleUnlike = () => {
+		setIsLike(false)
+		const payload = { id, likes: likes -1, dislikes }
 		dispatch(updateFilm(payload))
 	}
 
 	const handleDislike = () => {
-		let newLikes = likes
-		let newDislikes
-		if (isDislike) {
-			newDislikes = dislikes - 1
-		} else {
-			newDislikes = dislikes + 1
-		}
-		setIsDislike(!isDislike)
-		setIsLike(false)
-		const payload = { id, likes: newLikes, dislikes: newDislikes }
+		setIsDislike(true)
+		const payload = { id, likes, dislikes: dislikes +1 }
+		dispatch(updateFilm(payload))
+	}
+    const handleUndislike = () => {
+		setIsDislike(false)
+		const payload = { id, likes, dislikes: dislikes -1 }
 		dispatch(updateFilm(payload))
 	}
 
@@ -97,7 +92,7 @@ const Film = ({ film }) => {
 
 				<CardActions sx={{ justifyContent: 'center' }}>
 					<IconButton size="small">
-						<LikeIcon sx={sxLike} className={isLike ? 'active' : ''} onClick={handleLike} />
+						<LikeIcon sx={sxLike} className={isLike ? 'active' : ''} onClick={isLike ? handleUnlike : handleLike} />
 						{likes}
 					</IconButton>
 
@@ -105,7 +100,7 @@ const Film = ({ film }) => {
 						<DislikeIcon
 							sx={sxDislike}
 							className={isDislike ? 'active' : ''}
-							onClick={handleDislike}
+							onClick={isDislike ? handleUndislike : handleDislike}
 						/>
 						{dislikes}
 					</IconButton>
