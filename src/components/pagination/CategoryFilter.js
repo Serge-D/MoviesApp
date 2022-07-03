@@ -1,10 +1,16 @@
-import  React, {useState} from 'react'
+import React, { useState, useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+
 import { useTheme } from '@mui/material/styles'
 import OutlinedInput from '@mui/material/OutlinedInput'
 import InputLabel from '@mui/material/InputLabel'
 import MenuItem from '@mui/material/MenuItem'
 import FormControl from '@mui/material/FormControl'
 import Select from '@mui/material/Select'
+
+import { filmsSelector } from '../../redux/films'
+import { updateCategories, categoriesSelector } from '../../redux/categories'
+import { updatePagination } from '../../redux/pagination'
 
 const ITEM_HEIGHT = 48
 const ITEM_PADDING_TOP = 8
@@ -29,18 +35,38 @@ function getStyles(category, categories, theme) {
 }
 
 const CategoryFilter = () => {
+	const dispatch = useDispatch()
+
+	const [isCategories, setIsCategories] = useState(false)
+
+	const { films } = useSelector(filmsSelector)
+	const { filteredFilms } = useSelector(categoriesSelector)
+
 	const theme = useTheme()
 	const [categories, setCategories] = useState([])
+
+	useEffect(() => {
+		const payload = {
+			films: filteredFilms,
+			totalFilms: filteredFilms.length,
+		}
+		if (isCategories) {
+			setIsCategories(false)
+            console.log('cala', payload)
+            console.log("ISCATEGORIESTRUE")
+			dispatch(updatePagination(payload))
+		}
+	}, [isCategories])
 
 	const handleChange = (event) => {
 		const {
 			target: { value },
 		} = event
-		setCategories(
-
-			typeof value === 'string' ? value.split(',') : value,
-		)
-        console.log("resultat", categories)
+		setCategories(typeof value === 'string' ? value.split(',') : value)
+		const payload = { films, categories }
+		console.log('categoryFilter', payload)
+		dispatch(updateCategories(payload))
+        setIsCategories(true)
 	}
 
 	return (
@@ -60,7 +86,7 @@ const CategoryFilter = () => {
 						<MenuItem
 							key={category}
 							value={category}
-							style={getStyles(category, categoriesList, theme)}
+							style={getStyles(category, categories, theme)}
 						>
 							{category}
 						</MenuItem>

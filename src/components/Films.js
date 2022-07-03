@@ -5,7 +5,8 @@ import Grid from '@mui/material/Grid'
 import Box from '@mui/material/Box'
 import Paper from '@mui/material/Paper'
 
-import { fetchFilms, filmsSelector } from '../redux/films'
+import { fetchFilms } from '../redux/films'
+import { categoriesSelector } from '../redux/categories'
 import { paginationSelector } from '../redux/pagination'
 import Film from './Film'
 import PaginationPagesNumber from './pagination/TotalPagesNumber'
@@ -22,7 +23,7 @@ const sxPaper = {
 const Films = () => {
 	const dispatch = useDispatch()
 
-	const { totalFilms } = useSelector(filmsSelector)
+	const { filteredFilms } = useSelector(categoriesSelector)
 	const { currentFilmsPage } = useSelector(paginationSelector)
 
 	useEffect(() => {
@@ -31,7 +32,7 @@ const Films = () => {
 
 	return (
 		<>
-			{totalFilms > 0 && (
+			{filteredFilms && filteredFilms.length > 0 && (
 				<>
 					<Paper sx={sxPaper}>
 						<Box sx={{ width: 200 }}>

@@ -11,7 +11,6 @@ const getPaginationFilms = (filmsData) => {
 export const paginationSlice = createSlice({
 	name: 'pagination',
 	initialState: {
-		category: '',
 		currentPage: 0,
 		filmsPerPage: 0,
 		totalPages: 0,
@@ -19,17 +18,17 @@ export const paginationSlice = createSlice({
 	},
 	reducers: {
 		updatePagination: (state, { payload }) => {
-			const { currentPage, filmsPerPage, films, totalFilms, category } = payload
-			if (category) state.category = category
+			console.log("payload", payload)
+			const { currentPage, filmsPerPage, films, totalFilms} = payload
 			if (filmsPerPage) state.filmsPerPage = filmsPerPage
 			if (currentPage) state.currentPage = currentPage
-			if (totalFilms || filmsPerPage) state.totalPages = calculateTotalPages(totalFilms, filmsPerPage)
+			if (totalFilms || filmsPerPage) state.totalPages = calculateTotalPages(totalFilms, state.filmsPerPage)
 			if (currentPage && currentPage > state.totalPages) {
 				state.currentPage = 1
 			} else {
 				state.currentPage = currentPage
 			}
-			if (currentPage || filmsPerPage)
+			// if (currentPage || filmsPerPage)
 			state.currentFilmsPage = getPaginationFilms({ 
 				films, 
 				currentPage: state.currentPage, 

@@ -1,5 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { movies$ } from '../data/movies'
+import { updateCategories } from './categories'
 import { updatePagination } from './pagination'
 
 
@@ -22,9 +23,7 @@ export const filmSlice = createSlice({
 		},
 		updateFilm: (state, { payload }) => {
 			const { id, likes, dislikes, isLike, isDislike } = payload
-			console.log('payload', payload)
 			const updFilm = state.films.find((film) => film.id === id)
-			console.log('updated film', updFilm)
 			updFilm.likes = likes
 			updFilm.dislikes = dislikes
 			updFilm.isLike = isLike
@@ -37,6 +36,8 @@ export const fetchFilms = () => {
 	return async (dispatch) => {
 		movies$.then((data) => {
 			dispatch(getFilms(data))
+			const payloadCategories = {categories:[],films:data}
+			dispatch(updateCategories(payloadCategories))
 			const payload = {
 				films: data,
 				currentPage: 1,
