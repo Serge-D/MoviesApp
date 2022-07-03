@@ -61,14 +61,11 @@ const filmSlice = createSlice({
             const updFilm = state.films.find((film) => film.id === id)
             updFilm.likes = likes
             updFilm.dislikes = dislikes
+            const firstIndex = (state.currentPage - 1) * state.filmsPerPage
+			const lastIndex = state.currentPage * state.filmsPerPage
+			const newData = state.films.slice(firstIndex, lastIndex)
+			state.currentFilmsPage = [...newData] || []
         }
-        // completeUpdate: (state, {payload}) => {
-        //     const {totalPages, currentFilmsPage, currentPage, filmsPerPage} = payload
-        //     state.totalPages = totalPages
-        //     state.currentFilmsPage= currentFilmsPage
-        //     state.currentPage = currentPage
-        //     state.filmsPerPage = filmsPerPage
-        // }
     }
 })
 

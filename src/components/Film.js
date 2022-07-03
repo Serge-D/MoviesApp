@@ -15,8 +15,8 @@ import LikeIcon from '@mui/icons-material/ThumbUp'
 import DislikeIcon from '@mui/icons-material/ThumbDown'
 import LocalMoviesIcon from '@mui/icons-material/LocalMovies'
 
-import { deleteFilm, filmsSelector} from '../redux/redux';
-import calculateTotalPages from "../tools/calculateTotalPages"
+import { deleteFilm, filmsSelector, updateFilm } from '../redux/redux'
+import calculateTotalPages from '../tools/calculateTotalPages'
 
 const sxLike = {
 	'&.active': {
@@ -32,14 +32,14 @@ const sxDislike = {
 
 const getRatio = (likes, dislikes) => {
 	if (likes === 0 || dislikes === 0) return ''
-	if (likes > dislikes) return `Ratio ${Math.round(likes / dislikes)} : 1`
-	return `Ratio 1:${Math.round(dislikes / likes)}`
+	if (likes > dislikes) return `Ratio ${Math.ceil(likes / dislikes)} : 1`
+	return `Ratio 1:${Math.ceil(dislikes / likes)}`
 }
 
 const Film = ({ film }) => {
 	const dispatch = useDispatch()
 
-    const {totalFilms, filmsPerPage} = useSelector(filmsSelector)
+	const { totalFilms, filmsPerPage } = useSelector(filmsSelector)
 
 	const { id, title, category, likes, dislikes, img } = film
 
@@ -47,19 +47,37 @@ const Film = ({ film }) => {
 	const [isDislike, setIsDislike] = useState(false)
 
 	const handleDelete = () => {
-        const newTotalPages = calculateTotalPages(totalFilms -1 , filmsPerPage)
-		const payload = {totalPages: newTotalPages, id }
+		const newTotalPages = calculateTotalPages(totalFilms - 1, filmsPerPage)
+		const payload = { totalPages: newTotalPages, id }
 		dispatch(deleteFilm(payload))
 	}
 
 	const handleLike = () => {
+		let newLikes
+		let newDislikes = dislikes
+		if (isLike) {
+			newLikes = likes - 1
+		} else {
+			newLikes = likes + 1
+		}
 		setIsLike(!isLike)
 		setIsDislike(false)
+		const payload = { id, likes: newLikes, dislikes: newDislikes }
+		dispatch(updateFilm(payload))
 	}
 
 	const handleDislike = () => {
+		let newLikes = likes
+		let newDislikes
+		if (isDislike) {
+			newDislikes = dislikes - 1
+		} else {
+			newDislikes = dislikes + 1
+		}
 		setIsDislike(!isDislike)
 		setIsLike(false)
+		const payload = { id, likes: newLikes, dislikes: newDislikes }
+		dispatch(updateFilm(payload))
 	}
 
 	return (
