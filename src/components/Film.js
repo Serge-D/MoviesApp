@@ -15,8 +15,8 @@ import LikeIcon from '@mui/icons-material/ThumbUp'
 import DislikeIcon from '@mui/icons-material/ThumbDown'
 import LocalMoviesIcon from '@mui/icons-material/LocalMovies'
 
-import { deleteFilm, filmsSelector, updateFilm } from '../redux/films'
-import { paginationSelector, updatePagination} from "../redux/pagination"
+import { filmsSelector, deleteFilm, updateFilm } from '../redux/films'
+import { updateCurrentFilms, updateCategories, paginationSelector } from '../redux/pagination'
 
 const sxLike = {
 	'&.active': {
@@ -38,93 +38,118 @@ const getRatio = (likes, dislikes) => {
 
 const Film = ({ film }) => {
 	const dispatch = useDispatch()
-    const [isLike, setIsLike] = useState(false)
-	const [isDislike, setIsDislike] = useState(false)
 	const [isDelete, setIsDelete] = useState(false)
 	const [isUpdate, setIsUpdate] = useState(false)
-	const { films, totalFilms } = useSelector(filmsSelector)
-	const { currentPage, filmsPerPage } = useSelector(paginationSelector)
+	const [isLikeChecked, setIsLikeChecked] = useState(false)
+	const [isDislikeChecked, setIsDislikeChecked] = useState(false)
+	const [isUpdateCategories, setIsUpdateCategories] = useState(false)
+	const { filteredFilms } = useSelector(paginationSelector)
+	const { films } = useSelector(filmsSelector)
 
-	const { 
-        id, 
-        title, 
-        category, 
-        likes, 
-        dislikes,
-        isLike: isFilmLike,
-        isDislike: isFilmDislike,
-        img
-    } = film
+	const { id, title, category, likes, dislikes, isLiked, isDisliked, img } = film
 
-    useEffect(()=>{
-        if(isFilmLike !== null) setIsLike(isFilmLike)
-        if(isFilmDislike !== null) setIsDislike(isFilmDislike)
-    }, [])
+	useEffect(() => {
+		if (isLiked) setIsLikeChecked(true)
+		else setIsLikeChecked(false)
+	}, [isLiked])
 
-    useEffect(()=>{
-        const payload = {
-            films,
-            currentPage,
-            filmsPerPage,
-            totalFilms
-        }
-        if(isDelete){
-            setIsDelete(false)
-            dispatch(updatePagination(payload))
-        }
-    },[isDelete])
+	useEffect(() => {
+		if (isDisliked) setIsDislikeChecked(true)
+		else setIsDislikeChecked(false)
+	}, [isDisliked])
 
-    useEffect(()=>{
-        const payload = {
-            films,
-            currentPage,
-            filmsPerPage,
-            totalFilms
-        }
-        if(isUpdate){
-            setIsUpdate(false)
-            dispatch(updatePagination(payload))
-        }
-    },[isUpdate])
+	useEffect(() => {
+		if (isUpdateCategories) {
+			const payload = {
+				filteredFilms,
+				totalFilteredFilms: filteredFilms.length,
+			}
+			setIsUpdateCategories(false)
+			dispatch(updateCurrentFilms(payload))
+		}
+	}, [isUpdateCategories])
+
+	useEffect(() => {
+		if (isDelete) {
+			const payload = { films }
+			dispatch(updateCategories(payload))
+			setIsUpdateCategories(true)
+			setIsDelete(false)
+		}
+	}, [isDelete])
+
+	useEffect(() => {
+		if (isUpdate) {
+			const payload = { films }
+			dispatch(updateCategories(payload))
+			setIsUpdateCategories(true)
+			setIsUpdate(false)
+		}
+	}, [isUpdate])
 
 	const handleDelete = () => {
 		dispatch(deleteFilm(id))
-        setIsDelete(true)
+		setIsDelete(true)
 	}
 
 	const handleLike = () => {
 		let newDislikes = dislikes
-		setIsLike(true)
-		if (isDislike) {
+		setIsLikeChecked(true)
+		if (isDislikeChecked) {
 			--newDislikes
-			setIsDislike(false)
+			setIsDislikeChecked(false)
 		}
-		const payload = { id, likes: likes + 1, dislikes: newDislikes, isLike, isDislike }
+
+		const payload = {
+			id,
+			likes: likes + 1,
+			dislikes: newDislikes,
+			isLiked: true,
+			isDisliked: false,
+		}
+
 		dispatch(updateFilm(payload))
 		setIsUpdate(true)
 	}
-    
-    const handleUnlike = () => {
-		setIsLike(false)
-		const payload = { id, likes: likes - 1, dislikes, isLike, isDislike }
+
+	const handleUnlike = () => {
+		setIsLikeChecked(false)
+		const payload = {
+			id,
+			likes: likes - 1,
+			dislikes,
+			isLiked: false,
+			isDisliked: false,
+		}
+
 		dispatch(updateFilm(payload))
 		setIsUpdate(true)
 	}
 
 	const handleDislike = () => {
 		let newLikes = likes
-		setIsDislike(true)
-		if (isLike) {
+		setIsDislikeChecked(true)
+
+		if (isLiked) {
 			--newLikes
-			setIsLike(false)
+			setIsLikeChecked(false)
 		}
-		const payload = { id, likes: newLikes, dislikes: dislikes + 1, isLike, isDislike }
+		const payload = {
+			id,
+			likes: newLikes,
+			dislikes: dislikes + 1,
+			isLiked: false,
+			isDisliked: true,
+		}
+
 		dispatch(updateFilm(payload))
 		setIsUpdate(true)
 	}
-    const handleUndislike = () => {
-		setIsDislike(false)
-		const payload = { id, likes, dislikes: dislikes - 1, isLike, isDislike }
+	const handleUndislike = () => {
+		setIsDislikeChecked(false)
+
+		const payload = { id, likes, dislikes: dislikes - 1, isLiked: false, isDisliked: false }
+
 		dispatch(updateFilm(payload))
 		setIsUpdate(true)
 	}
@@ -146,15 +171,19 @@ const Film = ({ film }) => {
 
 				<CardActions sx={{ justifyContent: 'center' }}>
 					<IconButton size="small">
-						<LikeIcon sx={sxLike} className={isLike ? 'active' : ''} onClick={isLike ? handleUnlike : handleLike} />
+						<LikeIcon
+							sx={sxLike}
+							className={isLikeChecked ? 'active' : ''}
+							onClick={isLikeChecked ? handleUnlike : handleLike}
+						/>
 						{likes}
 					</IconButton>
 
 					<IconButton size="small">
 						<DislikeIcon
 							sx={sxDislike}
-							className={isDislike ? 'active' : ''}
-							onClick={isDislike ? handleUndislike : handleDislike}
+							className={isDislikeChecked ? 'active' : ''}
+							onClick={isDislikeChecked ? handleUndislike : handleDislike}
 						/>
 						{dislikes}
 					</IconButton>

@@ -1,42 +1,74 @@
 import { createSlice } from '@reduxjs/toolkit'
 import calculateTotalPages from '../tools/calculateTotalPages'
-
-const getPaginationFilms = (filmsData) => {
-	const { currentPage, filmsPerPage, films } = filmsData
-	const firstIndex = (currentPage - 1) * filmsPerPage
-	const lastIndex = currentPage * filmsPerPage
-	return films.slice(firstIndex, lastIndex)
-}
+import getPaginationFilms from '../tools/getPaginationFilms'
+import getCategoriesList from '../tools/getCategoriesList'
 
 export const paginationSlice = createSlice({
 	name: 'pagination',
 	initialState: {
-		currentPage: 0,
-		filmsPerPage: 0,
+		currentPage: 1,
+		filmsPerPage: 8,
 		totalPages: 0,
 		currentFilmsPage: [],
+		categories: [],
+		filteredFilms: [],
+		categoriesList: []
 	},
 	reducers: {
-		updatePagination: (state, { payload }) => {
-			console.log("payload", payload)
-			const { currentPage, filmsPerPage, films, totalFilms} = payload
-			if (filmsPerPage) state.filmsPerPage = filmsPerPage
-			if (currentPage) state.currentPage = currentPage
-			if (totalFilms || filmsPerPage) state.totalPages = calculateTotalPages(totalFilms, state.filmsPerPage)
-			if (currentPage && currentPage > state.totalPages) {
-				state.currentPage = 1
+		updateCurrentFilms: (state, { payload }) => {
+			const { filteredFilms } = payload
+
+			state.totalPages = calculateTotalPages(filteredFilms.length, state.filmsPerPage)
+
+			if (state.currentPage > state.totalPages) state.currentPage = 1
+
+			state.currentFilmsPage = getPaginationFilms({
+				filteredFilms,
+				currentPage: state.currentPage,
+				filmsPerPage: state.filmsPerPage,
+			})
+		},
+
+		updateCurrentPage: (state, { payload }) => {
+			const { currentPage, filteredFilms } = payload
+			state.currentPage = currentPage
+			if (state.currentPage > state.totalPages) state.currentPage = 1
+
+			state.currentFilmsPage = getPaginationFilms({
+				filteredFilms,
+				currentPage: state.currentPage,
+				filmsPerPage: state.filmsPerPage,
+			})
+		},
+
+		updateFilmsPerPage: (state, { payload }) => {
+			const { filmsPerPage, filteredFilms } = payload
+			state.filmsPerPage = filmsPerPage
+			state.totalPages = calculateTotalPages(filteredFilms.length, state.filmsPerPage)
+
+			if (state.currentPage > state.totalPages) state.currentPage = 1
+
+			state.currentFilmsPage = getPaginationFilms({
+				filteredFilms,
+				currentPage: state.currentPage,
+				filmsPerPage: state.filmsPerPage,
+			})
+		},
+		updateCategories: (state, { payload }) => {
+			const { categories, films } = payload
+			if (categories) state.categories = categories
+			if (state.categories.length === 0) {
+				state.filteredFilms = [...films]
 			} else {
-				state.currentPage = currentPage
+				state.filteredFilms = films.filter((film) => state.categories.includes(film.category))
 			}
-			// if (currentPage || filmsPerPage)
-			state.currentFilmsPage = getPaginationFilms({ 
-				films, 
-				currentPage: state.currentPage, 
-				filmsPerPage: state.filmsPerPage })
+			state.categoriesList = getCategoriesList(films)
 		},
 	},
 })
 
-export const { updatePagination } = paginationSlice.actions
+export const { updateCurrentFilms, updateCurrentPage, updateFilmsPerPage, updateCategories} = paginationSlice.actions
+
+export default paginationSlice.reducer
 
 export const paginationSelector = (state) => state.pagination

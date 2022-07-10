@@ -1,10 +1,8 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { movies$ } from '../data/movies'
-import { updateCategories } from './categories'
-import { updatePagination } from './pagination'
+import { updateCurrentFilms, updateCategories } from './pagination'
 
-
-export const filmSlice = createSlice({
+export const filmsSlice = createSlice({
 	name: 'films',
 	initialState: {
 		films: [],
@@ -22,33 +20,32 @@ export const filmSlice = createSlice({
 			state.totalFilms = data.length
 		},
 		updateFilm: (state, { payload }) => {
-			const { id, likes, dislikes, isLike, isDislike } = payload
+			const { id, likes, dislikes, isLiked, isDisliked } = payload
+
 			const updFilm = state.films.find((film) => film.id === id)
 			updFilm.likes = likes
 			updFilm.dislikes = dislikes
-			updFilm.isLike = isLike
-			updFilm.isDislike = isDislike
+			updFilm.isLiked = isLiked
+			updFilm.isDisliked = isDisliked
 		},
 	},
 })
 
+export const { getFilms, deleteFilm, updateFilm } = filmsSlice.actions
+
+export const filmsSelector = (state) => state.films
+
+export default filmsSlice.reducer
 export const fetchFilms = () => {
 	return async (dispatch) => {
 		movies$.then((data) => {
 			dispatch(getFilms(data))
-			const payloadCategories = {categories:[],films:data}
+			const payloadCategories = { categories: [], films: data }
 			dispatch(updateCategories(payloadCategories))
 			const payload = {
-				films: data,
-				currentPage: 1,
-				filmsPerPage: 8,
-				totalFilms: data.length,
+				filteredFilms: data
 			}
-			dispatch(updatePagination(payload))
+			dispatch(updateCurrentFilms(payload))
 		})
 	}
 }
-
-export const { getFilms, deleteFilm, updateFilm } = filmSlice.actions
-
-export const filmsSelector = (state) => state.films

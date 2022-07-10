@@ -1,20 +1,16 @@
-/* eslint-disable react/prop-types */
 import React from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import { filmsSelector } from '../../redux/films'
-import { paginationSelector, updatePagination } from '../../redux/pagination'
+import { paginationSelector, updateCurrentPage } from '../../redux/pagination'
 import { Pagination } from '@mui/material'
 
 const TotalPagesNumber = () => {
 	const dispatch = useDispatch()
 
-	const { currentPage, totalPages } = useSelector(paginationSelector)
-	const { films } = useSelector(filmsSelector)
+	const { currentPage, totalPages, filteredFilms } = useSelector(paginationSelector)
 
 	const handleChangePage = (e, newPage) => {
-        
-		const payload = {films, currentPage: newPage}
-		dispatch(updatePagination(payload))
+		const payload = { filteredFilms, currentPage: newPage }
+		dispatch(updateCurrentPage(payload))
 	}
 
 	return (
